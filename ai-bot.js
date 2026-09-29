@@ -1,6 +1,5 @@
 /* ============================================
-   AI Guide Bot — Main Logic
-   Bishop Angelo Tarantino Memorial Secondary School
+   AI Guide Bot — COMPLETE FILE
    ============================================ */
 
 (function () {
@@ -15,9 +14,9 @@
   let botButton, botWindow, messagesBox, inputField, sendButton;
   let authBadge, historyButton;
 
-  /* ============================================
-     INIT
-     ============================================ */
+  // ============================================
+  // INIT
+  // ============================================
   async function initBot() {
     if (botInitialized) return;
     botInitialized = true;
@@ -41,7 +40,9 @@
     }
   }
 
-  /* ---------- HTML ---------- */
+  // ============================================
+  // HTML
+  // ============================================
   function injectHTML() {
     const html = `
       <div id="ai-bot-button" role="button" aria-label="Open school assistant" tabindex="0">
@@ -51,8 +52,7 @@
           <circle cx="6" cy="18" r="2" fill="#0d3b66"/>
           <circle cx="18" cy="18" r="2" fill="#0d3b66"/>
           <circle cx="12" cy="12" r="3" fill="#0d3b66"/>
-          <path d="M6 6L12 12M18 6L12 12M6 18L12 12M18 18L12 12"
-                stroke="#0d3b66" stroke-width="1.5" opacity="0.7"/>
+          <path d="M6 6L12 12M18 6L12 12M6 18L12 12M18 18L12 12" stroke="#0d3b66" stroke-width="1.5" opacity="0.7"/>
         </svg>
       </div>
 
@@ -77,36 +77,30 @@
         </div>
       </div>
 
-      <!-- Auth Modal -->
       <div id="ai-auth-modal">
         <div class="ai-auth-box">
           <button class="ai-auth-close" id="ai-auth-close">✖</button>
           <h2 id="ai-auth-title">Welcome Back</h2>
           <p id="ai-auth-sub">Sign in to save your chat history</p>
-
           <form id="ai-auth-form">
             <div id="ai-auth-name-row" style="display:none">
               <input type="text" id="ai-auth-name" placeholder="Your name" />
             </div>
-            <input type="email"    id="ai-auth-email"    placeholder="Email address" required />
+            <input type="email" id="ai-auth-email" placeholder="Email address" required />
             <input type="password" id="ai-auth-password" placeholder="Password (min 6 chars)" required minlength="6" />
             <button type="submit" id="ai-auth-submit">Sign In</button>
           </form>
-
           <p class="ai-auth-switch">
             <span id="ai-auth-switch-text">Don't have an account?</span>
             <a href="#" id="ai-auth-switch-link">Sign up</a>
           </p>
-
           <p class="ai-auth-guest">
             <a href="#" id="ai-auth-continue-guest">Continue as guest (no history saved)</a>
           </p>
-
           <p class="ai-auth-error" id="ai-auth-error"></p>
         </div>
       </div>
 
-      <!-- History Modal -->
       <div id="ai-history-modal">
         <div class="ai-history-box">
           <button class="ai-auth-close" id="ai-history-close">✖</button>
@@ -132,10 +126,7 @@
   function attachEvents() {
     botButton.addEventListener("click", toggleBot);
     botButton.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggleBot();
-      }
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleBot(); }
     });
 
     document.getElementById("ai-bot-close").addEventListener("click", toggleBot);
@@ -158,16 +149,15 @@
     setupAuthForm();
   }
 
-  /* ============================================
-     AUTH STATE HANDLERS
-     ============================================ */
+  // ============================================
+  // AUTH HANDLERS
+  // ============================================
   async function onLogin(e) {
     isLoggedIn = true;
     const user = e.detail;
     currentUserName = user.displayName || user.email?.split("@")[0] || "there";
 
-    document.getElementById("ai-bot-status").textContent =
-      `● ${currentUserName} — history on`;
+    document.getElementById("ai-bot-status").textContent = `● ${currentUserName} — history on`;
     authBadge.textContent = "🚪";
     authBadge.title = "Logout";
 
@@ -200,10 +190,7 @@
       } else {
         currentSessionId = await window.tarantinoCreateSession("New chat");
         clearMessages();
-        addMessage(
-          `👋 Welcome back, <b>${escapeHTML(currentUserName)}</b>! How can I help you today?`,
-          "bot"
-        );
+        addMessage(`👋 Welcome back, <b>${escapeHTML(currentUserName)}</b>! How can I help you today?`, "bot");
         showQuickReplies();
       }
     } catch (err) {
@@ -216,19 +203,12 @@
     const msgs = await window.tarantinoLoadMessages(sessionId);
 
     if (msgs.length === 0) {
-      addMessage(
-        `👋 Welcome back, <b>${escapeHTML(currentUserName)}</b>! How can I help you today?`,
-        "bot"
-      );
+      addMessage(`👋 Welcome back, <b>${escapeHTML(currentUserName)}</b>! How can I help you today?`, "bot");
       showQuickReplies();
       return;
     }
 
-    addMessage(
-      `👋 Welcome back, <b>${escapeHTML(currentUserName)}</b>. Continuing your last chat:`,
-      "bot"
-    );
-
+    addMessage(`👋 Welcome back, <b>${escapeHTML(currentUserName)}</b>. Continuing your last chat:`, "bot");
     msgs.forEach(m => addMessage(m.text, m.sender));
 
     conversationHistory = msgs.map(m => ({
@@ -240,25 +220,19 @@
   async function startNewChat() {
     document.getElementById("ai-history-modal").classList.remove("open");
     if (!isLoggedIn) return;
-
     currentSessionId = await window.tarantinoCreateSession("New chat");
     conversationHistory = [];
     clearMessages();
-    addMessage(
-      `👋 New chat started. How can I help you, <b>${escapeHTML(currentUserName)}</b>?`,
-      "bot"
-    );
+    addMessage(`👋 New chat started. How can I help you, <b>${escapeHTML(currentUserName)}</b>?`, "bot");
     showQuickReplies();
   }
 
-  /* ============================================
-     UI: MODALS
-     ============================================ */
+  // ============================================
+  // MODALS
+  // ============================================
   function openAuthModal() {
     if (isLoggedIn) {
-      if (confirm("Log out? Your chats stay saved.")) {
-        window.tarantinoLogout();
-      }
+      if (confirm("Log out? Your chats stay saved.")) window.tarantinoLogout();
       return;
     }
     document.getElementById("ai-auth-modal").classList.add("open");
@@ -291,9 +265,7 @@
       sessions.forEach(s => {
         const item = document.createElement("div");
         item.className = "ai-history-item";
-        const date = s.updatedAt?.toDate
-          ? s.updatedAt.toDate().toLocaleString()
-          : "—";
+        const date = s.updatedAt?.toDate ? s.updatedAt.toDate().toLocaleString() : "—";
         item.innerHTML = `
           <div class="ai-history-title">${escapeHTML(s.title || "Untitled")}</div>
           <div class="ai-history-date">${date}</div>
@@ -311,9 +283,9 @@
     }
   }
 
-  /* ============================================
-     UI: AUTH FORM
-     ============================================ */
+  // ============================================
+  // AUTH FORM
+  // ============================================
   let authMode = "login";
 
   function setupAuthForm() {
@@ -393,9 +365,9 @@
     return "Something went wrong. Please try again.";
   }
 
-  /* ============================================
-     UI: CHAT
-     ============================================ */
+  // ============================================
+  // CHAT UI
+  // ============================================
   function toggleBot() {
     botWindow.classList.toggle("open");
     if (botWindow.classList.contains("open")) {
@@ -463,9 +435,9 @@
     document.getElementById("quick-replies")?.remove();
   }
 
-  /* ============================================
-     SEND + RESPOND
-     ============================================ */
+  // ============================================
+  // SEND + RESPOND
+  // ============================================
   function handleSend() {
     const text = inputField.value.trim();
     if (!text) return;
@@ -482,20 +454,14 @@
     sendButton.disabled = true;
 
     try {
-      // ═══════════════════════════════════════════════════
-      // 1️⃣ SEARCH FIRESTORE KNOWLEDGE FIRST
-      // ═══════════════════════════════════════════════════
+      // 1️⃣ Firestore knowledge
       if (typeof window.tarantinoSearchKnowledge === "function") {
         try {
           const hit = await window.tarantinoSearchKnowledge(userText);
           if (hit) {
             removeTyping();
-
             let reply = hit.answer || "Here's what I found:";
-            if (hit.url) {
-              reply += `<br><br>👉 <a href="${hit.url}" target="_blank">Open page</a>`;
-            }
-
+            if (hit.url) reply += `<br><br>👉 <a href="${hit.url}" target="_blank">Open page</a>`;
             addMessage(reply, "bot", true);
             conversationHistory.push({ role: "assistant", content: reply });
             return;
@@ -505,24 +471,7 @@
         }
       }
 
-      // ═══════════════════════════════════════════════════
-      // 2️⃣ TRY AI (if enabled)
-      // ═══════════════════════════════════════════════════
-      if (typeof BOT_CONFIG !== "undefined" && BOT_CONFIG.useAI) {
-        try {
-          const aiReply = await askAI(userText);
-          removeTyping();
-          addMessage(aiReply, "bot", true);
-          conversationHistory.push({ role: "assistant", content: aiReply });
-          return;
-        } catch (aiErr) {
-          console.warn("[AI Bot] AI failed, falling back:", aiErr);
-        }
-      }
-
-      // ═══════════════════════════════════════════════════
-      // 3️⃣ LOCAL RULES (greetings, math, time, jokes)
-      // ═══════════════════════════════════════════════════
+      // 2️⃣ Local rules
       if (typeof getGeneralResponse === "function") {
         const generalReply = getGeneralResponse(userText);
         if (generalReply) {
@@ -533,9 +482,7 @@
         }
       }
 
-      // ═══════════════════════════════════════════════════
-      // 4️⃣ HARDCODED SITE_ACTIONS
-      // ═══════════════════════════════════════════════════
+      // 3️⃣ Keyword match
       const reply = await keywordMatch(userText);
       removeTyping();
       addMessage(reply, "bot", true);
@@ -573,32 +520,19 @@
     });
   }
 
-  async function askAI(userText) {
-    const res = await fetch(BOT_CONFIG.apiEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: userText,
-        history: conversationHistory.slice(-6)
-      })
-    });
-    if (!res.ok) throw new Error("API error: " + res.status);
-    const data = await res.json();
-    return data.reply || FALLBACK_REPLY;
-  }
-
-  /* ============================================
-     UTIL
-     ============================================ */
+  // ============================================
+  // UTIL
+  // ============================================
   function escapeHTML(str) {
-    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;")
-              .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
-              .replace(/'/g,"&#39;");
+    return String(str == null ? "" : str)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+      .replace(/'/g,"&#39;");
   }
 
-  /* ============================================
-     BOOT
-     ============================================ */
+  // ============================================
+  // BOOT
+  // ============================================
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initBot);
   } else {

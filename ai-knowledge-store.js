@@ -1,85 +1,91 @@
 /* ============================================
-   Firestore Knowledge Base — Answer Lookup
-   Searches a public "knowledge" collection
+   Firestore Knowledge Base — AI Bot Only
    ============================================ */
 
 import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy
+  collection, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const { db } = window.tarantinoAuth;
-
-/* In-memory cache so we don't hit Firestore on every message */
-let knowledgeCache = null;
-let cacheTimestamp = 0;
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-/* ---------- Load all knowledge entries (with cache) ---------- */
-async function loadKnowledge() {
-  const now = Date.now();
-  if (knowledgeCache && (now - cacheTimestamp) < CACHE_TTL_MS) {
-    return knowledgeCache;
-  }
-
-  try {
-    const snap = await getDocs(collection(db, "knowledge"));
-    knowledgeCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    cacheTimestamp = now;
-    console.log(`[Knowledge] Loaded ${knowledgeCache.length} entries`);
-    return knowledgeCache;
-  } catch (err) {
-    console.warn("[Knowledge] Failed to load:", err);
-    return [];
-  }
+function waitForFirebase() {
+  return new Promise((resolve) => {
+    if (window.tarantinoAuth?.db) return resolve(window.tarantinoAuth);
+    const check = setInterval(() => {
+      if (window.tarantinoAuth?.db) {
+        clearInterval(check);
+        resolve(window.tarantinoAuth);
+      }
+    }, 20);
+    setTimeout(() => clearInterval(check), 10000);
+  });
 }
 
-/* ---------- Search knowledge base for best match ---------- */
-window.tarantinoSearchKnowledge = async function (userQuery) {
-  const entries = await loadKnowledge();
-  if (entries.length === 0) return null;
+(async () => {
+  const { db } = await waitForFirebase();
+  console.log("[Knowledge] Starting…");
 
-  const text = userQuery.toLowerCase().trim();
-  let best = null;
-  let bestScore = 0;
+  let cache = null;
+  let cacheTime = 0;
+  const CACHE_TTL = 3 * 60 * 1000;
 
-  for (const entry of entries) {
-    const keywords = entry.keywords || [];
-    let score = 0;
+  async function loadKnowledge() {
+    const now = Date.now();
+    if (cache && (now - cacheTime) < CACHE_TTL) return cache;
+    try {
+      const snap = await getDocs(collection(db, "knowledge"));
+      cache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      cacheTime = now;
+      console.log(`[Knowledge] Loaded ${cache.length} entries`);
+      return cache;
+    } catch (err) {
+      console.warn("[Knowledge] Failed to load:", err);
+      return [];
+    }
+  }
 
-    for (const kw of keywords) {
-      if (text.includes(kw.toLowerCase())) {
-        score += kw.length;      // longer match = higher score
+  async function searchKnowledge(query) {
+    const entries = await loadKnowledge();
+    if (entries.length === 0) return null;
+
+    const text = query.toLowerCase().trim();
+    if (text.length < 2) return null;
+
+    let best = null;
+    let bestScore = 0;
+
+    for (const entry of entries) {
+      let score = 0;
+
+      for (const kw of (entry.keywords || [])) {
+        const k = String(kw).toLowerCase();
+        if (text.includes(k)) score += k.length;
+      }
+
+      const q = (entry.question || "").toLowerCase();
+      if (q && text.includes(q)) score += 100;
+
+      score += (Number(entry.priority) || 0) * 2;
+
+      if (score > bestScore) {
+        bestScore = score;
+        best = entry;
       }
     }
 
-    // Exact question match = big bonus
-    if (entry.question && text.includes(entry.question.toLowerCase())) {
-      score += 100;
+    if (bestScore >= 4) {
+      console.log("[Knowledge] Match:", best.question, "| Score:", bestScore);
+      return best;
     }
-
-    if (score > bestScore) {
-      bestScore = score;
-      best = entry;
-    }
+    return null;
   }
 
-  // Only return if we have a meaningful match
-  if (bestScore >= 3) {
-    return best;
+  function clearCache() {
+    cache = null;
+    cacheTime = 0;
+    console.log("[Knowledge] Cache cleared");
   }
-  return null;
-};
 
-/* ---------- Clear cache (call after admin updates) ---------- */
-window.tarantinoClearKnowledgeCache = function () {
-  knowledgeCache = null;
-  cacheTimestamp = 0;
-  console.log("[Knowledge] Cache cleared");
-};
+  window.tarantinoSearchKnowledge = searchKnowledge;
+  window.tarantinoClearKnowledgeCache = clearCache;
 
-console.log("[Knowledge Store] Ready");
-
+  console.log("[Knowledge] ✅ Ready");
+})();

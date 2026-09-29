@@ -1,91 +1,84 @@
 /* ============================================
-   Firestore chat store — sessions + messages
-   Exposes: tarantinoCreateSession, tarantinoSaveMessage,
-            tarantinoListSessions, tarantinoLoadMessages,
-            tarantinoDeleteSession
+   Firestore Chat Store — AI Bot Only
    ============================================ */
 
 import {
-  collection,
-  doc,
-  addDoc,
-  setDoc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit as fbLimit,
-  serverTimestamp,
-  deleteDoc
+  collection, doc, addDoc, setDoc, getDocs,
+  query, orderBy, limit as fbLimit,
+  serverTimestamp, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const { db, auth } = window.tarantinoAuth;
-
-/* ---------- Get current uid or throw ---------- */
-function requireUser() {
-  const uid = auth.currentUser?.uid;
-  if (!uid) throw new Error("Not authenticated");
-  return uid;
+function waitForFirebase() {
+  return new Promise((resolve) => {
+    if (window.tarantinoAuth?.db) return resolve(window.tarantinoAuth);
+    const check = setInterval(() => {
+      if (window.tarantinoAuth?.db) {
+        clearInterval(check);
+        resolve(window.tarantinoAuth);
+      }
+    }, 20);
+    setTimeout(() => clearInterval(check), 10000);
+  });
 }
 
-/* ---------- Create a new chat session ---------- */
-window.tarantinoCreateSession = async function (title = "New chat") {
-  const uid = requireUser();
-  const ref = await addDoc(collection(db, "users", uid, "sessions"), {
-    title,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-  return ref.id;
-};
+(async () => {
+  const { db, auth } = await waitForFirebase();
 
-/* ---------- Save a message in a session ---------- */
-window.tarantinoSaveMessage = async function (sessionId, sender, text) {
-  const uid = requireUser();
+  function requireUser() {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error("Not authenticated");
+    return uid;
+  }
 
-  // Add message
-  await addDoc(collection(db, "users", uid, "sessions", sessionId, "messages"), {
-    sender,       // "user" | "bot"
-    text,
-    createdAt: serverTimestamp()
-  });
+  window.tarantinoCreateSession = async (title = "New chat") => {
+    const uid = requireUser();
+    const ref = await addDoc(collection(db, "users", uid, "sessions"), {
+      title,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return ref.id;
+  };
 
-  // Touch session updatedAt
-  await setDoc(
-    doc(db, "users", uid, "sessions", sessionId),
-    { updatedAt: serverTimestamp() },
-    { merge: true }
-  );
-};
+  window.tarantinoSaveMessage = async (sessionId, sender, text) => {
+    const uid = requireUser();
+    await addDoc(collection(db, "users", uid, "sessions", sessionId, "messages"), {
+      sender,
+      text,
+      createdAt: serverTimestamp()
+    });
+    await setDoc(
+      doc(db, "users", uid, "sessions", sessionId),
+      { updatedAt: serverTimestamp() },
+      { merge: true }
+    );
+  };
 
-/* ---------- List recent sessions ---------- */
-window.tarantinoListSessions = async function (max = 20) {
-  const uid = requireUser();
-  const q = query(
-    collection(db, "users", uid, "sessions"),
-    orderBy("updatedAt", "desc"),
-    fbLimit(max)
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-};
+  window.tarantinoListSessions = async (max = 20) => {
+    const uid = requireUser();
+    const q = query(
+      collection(db, "users", uid, "sessions"),
+      orderBy("updatedAt", "desc"),
+      fbLimit(max)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
 
-/* ---------- Load messages in a session ---------- */
-window.tarantinoLoadMessages = async function (sessionId) {
-  const uid = requireUser();
-  const q = query(
-    collection(db, "users", uid, "sessions", sessionId, "messages"),
-    orderBy("createdAt", "asc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-};
+  window.tarantinoLoadMessages = async (sessionId) => {
+    const uid = requireUser();
+    const q = query(
+      collection(db, "users", uid, "sessions", sessionId, "messages"),
+      orderBy("createdAt", "asc")
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  };
 
-/* ---------- Delete a session ---------- */
-window.tarantinoDeleteSession = async function (sessionId) {
-  const uid = requireUser();
-  await deleteDoc(doc(db, "users", uid, "sessions", sessionId));
-};
+  window.tarantinoDeleteSession = async (sessionId) => {
+    const uid = requireUser();
+    await deleteDoc(doc(db, "users", uid, "sessions", sessionId));
+  };
 
-console.log("[Chat Store] Ready");
+  console.log("[Chat Store] ✅ Ready");
+})();

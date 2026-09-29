@@ -296,9 +296,9 @@ How can I help you today? You can ask me about admissions, fees, subjects, or co
 /* ---------- Config ---------- */
 const BOT_CONFIG = {
   schoolName: "Bishop Angelo Tarantino Memorial Secondary School",
-  whatsappNumber: "256700000000",   // ⚠️ Replace with real number (no + or spaces)
-  useAI: false,                     // Set true if using serverless AI (api/chat.js)
-  apiEndpoint: "/api/chat"          // Only used when useAI = true
+  whatsappNumber: "256700000000",
+  useAI: false,
+  apiEndpoint: ""
 };
 
 /* ============================================

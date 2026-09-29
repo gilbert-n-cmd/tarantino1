@@ -1,23 +1,34 @@
 /* ============================================
-   Firebase Configuration
+   Firebase Configuration — AI BOT ONLY
+   Project: tarantino-3e322
    ============================================ */
 
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAGWdBaIUOYT-SwOQuWMjRymDUnRNP60MA",
-  authDomain: "my-registration-and-login.firebaseapp.com",
-  projectId: "my-registration-and-login",
-  storageBucket: "my-registration-and-login.firebasestorage.app",
-  messagingSenderId: "751883676713",
-  appId: "1:751883676713:web:4401fcf89e4ce348ef8038",
-  measurementId: "G-NRKKC9K2ZM"
+  apiKey: "AIzaSyAlzi8-VRoq2S3fem1qHtoU8xcOL-ywUBo",
+  authDomain: "tarantino-3e322.firebaseapp.com",
+  projectId: "tarantino-3e322",
+  storageBucket: "tarantino-3e322.firebasestorage.app",
+  messagingSenderId: "364845638359",
+  appId: "1:364845638359:web:1f8331fd05af099c7cc692"
 };
 
-const FIREBASE_VERSION = "10.12.0";
-const FIREBASE_CDN = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}`;
+// Init once (dedicated app name "bot")
+const app = getApps().some(a => a.name === "bot")
+  ? getApp("bot")
+  : initializeApp(firebaseConfig, "bot");
 
-/* ✅ Expose globally for modules */
-window.FIREBASE_CONFIG  = firebaseConfig;
-window.FIREBASE_VERSION = FIREBASE_VERSION;
-window.FIREBASE_CDN     = FIREBASE_CDN;
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
-console.log("[Firebase] Config loaded:", firebaseConfig.projectId);
+// Expose globally
+window.FIREBASE_CONFIG = firebaseConfig;
+window.FIREBASE_APP    = app;
+window.FIREBASE_AUTH   = auth;
+window.FIREBASE_DB     = db;
+window.tarantinoAuth   = { auth, db };
+
+console.log("[Firebase] ✅ Ready:", firebaseConfig.projectId);
