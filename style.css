@@ -841,40 +841,35 @@ nav .dropdown-submenu:hover .dropdown-submenu-content {
   }
 }
 
-/* ============================================
-   SCHOOL BADGE — no ring, just the image
-   ============================================ */
-.nav-badge {
-  width: 70px;
-  height: 70px;
-  object-fit: contain;
-  background: transparent;         /* ← no white fill */
-  padding: 0;                      /* ← no inner gap */
-  border: none;                    /* ← no ring */
-  border-radius: 0;                /* ← no circle clip */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);  /* ← subtle shadow for depth */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  flex-shrink: 0;
-  display: block;
-}
+ /* ============================================
+    SCHOOL BADGE — MOBILE ONLY
+    ============================================ */
 
-.nav-badge:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .nav-badge {
-    width: 58px;
-    height: 58px;
-    margin-left: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-badge {
-    width: 50px;
-    height: 50px;
-  }
-}
+    .nav-badge {
+      display: none;
+    }
+    
+    /* Show badge only on small screens */
+    @media (max-width: 768px) {
+      .nav-badge {
+        width: 58px;
+        height: 58px;
+        object-fit: cover;
+        background: transparent;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        flex-shrink: 0;
+        display: block;
+        margin-left: auto;
+      }
+    
+      .nav-badge:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      }
+    }
+    
+    
