@@ -513,12 +513,13 @@ nav .dropdown-submenu:hover .dropdown-submenu-content {
 .time {
   background: #419efc;
   color: white;
-  padding: 10px;
+  padding: 20px;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 20px;
   font-size: 14px;
-  height: 10px;
+  height: 30px;
+  
 }
 
 #chat-container .chat-header {
@@ -873,3 +874,114 @@ nav .dropdown-submenu:hover .dropdown-submenu-content {
     }
     
     
+@media (max-width: 768px) {
+  /* 1. Hide the email and the pipe */
+  .header-contact a[href^="mailto:"] {
+    display: none !important;
+  }
+  .header-contact {
+    font-size: 0 !important;
+  }
+
+  /* 2. Setup the Top Bar as a vertical column */
+  header .top-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 15px !important;
+    gap: 15px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3. Show the school name on top */
+  header .school-brand {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    order: 1 !important;
+    width: 100% !important;
+  }
+
+  header .school-brand .logo {
+    display: block !important;
+    font-size: 16px !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Hide the big badge */
+  header .school-brand .school-badge {
+    display: none !important;
+  }
+
+  /* 4. MAGIC TRICK: Break the inner containers so their children flow in a row */
+  header .header-contact,
+  header .right-section,
+  header .socials-icons {
+    display: contents !important; 
+  }
+
+  /* 5. Force all buttons/icons into one horizontal row below the name */
+  header .top-bar {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important; 
+  }
+
+  /* 6. Re-apply styles since "display: contents" removed their boxes */
+  .header-contact .cta-btn,
+  header .socials-icons a,
+  #portalBtn {
+    order: 2 !important; /* Puts them below the school name */
+  }
+
+  /* 7. Ensure the "Call Now" button pushes to the left */
+  .header-contact .cta-btn {
+    margin-right: auto !important;
+    font-size: 14px !important;
+    padding: 8px 16px !important;
+  }
+
+  /* 8. Ensure the "Portal" button pushes to the right */
+  #portalBtn {
+    margin-left: auto !important;
+    font-size: 14px !important;
+    padding: 8px 16px !important;
+  }
+
+  /* 9. Center the social icons exactly in the middle */
+  header .socials-icons a {
+    font-size: 22px !important;
+    color: white !important;
+    margin: 0 6px !important; /* Space between icons */
+  }
+}
+
+
+/* Portal entry: clear white button on every page */
+#portalBtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff !important;
+  color: #004080 !important;
+  border: 2px solid #004080 !important;
+  border-radius: 7px;
+  padding: 8px 16px;
+  min-height: 38px;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+#portalBtn:hover, #portalBtn:focus-visible {
+  background: #f1f7ff !important;
+  color: #003366 !important;
+}
+
+/* The small navigation badge is intended for mobile screens only. */
+nav .nav-badge { display: none !important; }
+@media (max-width: 768px) {
+  nav .nav-badge { display: block !important; }
+}

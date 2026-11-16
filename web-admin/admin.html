@@ -6,7 +6,7 @@
   <title>admin</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261112b">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -56,6 +56,25 @@
       font-size: 0.9rem;
     }
   </style>
+
+  <!-- Localhost display fixes: deliberately loaded after all shared stylesheets. -->
+  <style id="localhost-display-fixes">
+    /* The secondary navigation badge is mobile-only. */
+    nav img.nav-badge, nav .nav-badge { display: none !important; }
+    @media screen and (max-width: 768px) {
+      nav img.nav-badge, nav .nav-badge { display: block !important; }
+    }
+    /* Keep the Portal control a clearly visible white button. */
+    #portalBtn {
+      display: inline-flex !important; align-items: center !important; justify-content: center !important;
+      background: #fff !important; color: #06427a !important; border: 2px solid #06427a !important;
+      border-radius: 8px !important; padding: 8px 18px !important; min-height: 38px !important;
+      font-weight: 700 !important; text-decoration: none !important; cursor: pointer !important;
+      opacity: 1 !important; visibility: visible !important;
+    }
+    #portalBtn:hover, #portalBtn:focus-visible { background: #edf5ff !important; color: #04345f !important; }
+  </style>
+
 </head>
 <body>
 
@@ -64,13 +83,7 @@
         <div class="logo" style="color: white; font-size: 24px; font-weight: bold;">Bishop Angelo Tarantino Memorial Secondary School</div>
 
         <div id="chat-container">
-
-  <button class= "chat-header" onclick="location.href='tarantino E-learning/student-login.html';" style="margin-right: 0px; margin-left: 0; padding: 6px 14px; font-size: 0.9rem; vertical-align: middle; cursor:pointer; position: relative; margin-bottom: 5px;">E-learning</button>
-
-          
-            <div class="time"><b>Current Time: <span id="liveTime"></span></b>
-                <b>Current Date: <span id="liveDate"></span></b></div>
-            <!---<button class="chat-btn" onclick="toggleChat()">💬 Chat with Us</button>--->
+<!---<button class="chat-btn" onclick="toggleChat()">💬 Chat with Us</button>--->
         <div id="chat-box">
           <!---<div class="chat-header">
             <span>Live Chat</span>
